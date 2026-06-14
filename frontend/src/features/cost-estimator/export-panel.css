@@ -1,0 +1,45 @@
+.export-panel {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.export-panel h3 {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+  color: var(--text-heading);
+}
+
+.export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.export-actions button {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.8rem;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.export-actions button:hover:not(:disabled) {
+  background: var(--btn-secondary-hover);
+  border-color: var(--accent);
+  color: var(--text-heading);
+}
+
+.export-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.export-error {
+  color: var(--danger);
+  margin-top: 0.5rem;
+  font-size: 0.88rem;
+}

@@ -1,0 +1,27 @@
+{
+  "id": "install-closet-001",
+  "zone": {
+    "anchorWallIds": ["wall-north"],
+    "bounds": {
+      "min": { "x": 0, "y": 0, "z": 0 },
+      "max": { "x": 4200, "y": 2700, "z": 620 }
+    }
+  },
+  "clearances": {
+    "top": 50,
+    "bottom": 0,
+    "left": 50,
+    "right": 50,
+    "back": 10,
+    "front": 0
+  },
+  "tolerances": {
+    "width": 2,
+    "height": 2,
+    "depth": 1
+  },
+  "references": {
+    "floorOffset": 100,
+    "referenceWallId": "wall-north"
+  }
+}

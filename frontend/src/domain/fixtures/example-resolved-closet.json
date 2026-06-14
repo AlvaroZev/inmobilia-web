@@ -1,0 +1,174 @@
+{
+  "id": "closet-001",
+  "name": "Closet empotrado 2.40m",
+  "root": {
+    "id": "root",
+    "label": "Cuerpo principal",
+    "x": 50,
+    "y": 100,
+    "z": 10,
+    "width": 4098,
+    "height": 2548,
+    "depth": 600,
+    "children": [
+      {
+        "id": "left-body",
+        "label": "Cuerpo izquierdo",
+        "x": 50,
+        "y": 100,
+        "z": 10,
+        "width": 2049,
+        "height": 2548,
+        "depth": 600,
+        "children": [],
+        "features": [
+          {
+            "id": "shelves-left",
+            "type": "shelf_set",
+            "x": 50,
+            "y": 100,
+            "z": 10,
+            "width": 2049,
+            "height": 2548,
+            "depth": 600,
+            "params": {
+              "count": 4,
+              "spacing": "equal"
+            }
+          },
+          {
+            "id": "rod-left",
+            "type": "hanger_rod",
+            "x": 50,
+            "y": 100,
+            "z": 10,
+            "width": 2049,
+            "height": 2548,
+            "depth": 600,
+            "params": {
+              "heightFromTop": 1800
+            }
+          }
+        ],
+        "fronts": [
+          {
+            "id": "door-left",
+            "type": "door",
+            "x": 50,
+            "y": 100,
+            "z": 10,
+            "width": 2049,
+            "height": 2548,
+            "depth": 600,
+            "params": {
+              "hinge": "left",
+              "materialId": "melamine-white"
+            }
+          }
+        ]
+      },
+      {
+        "id": "right-body",
+        "label": "Cuerpo derecho",
+        "x": 2099,
+        "y": 100,
+        "z": 10,
+        "width": 2049,
+        "height": 2548,
+        "depth": 600,
+        "children": [
+          {
+            "id": "right-upper",
+            "label": "Repisas superiores",
+            "x": 2099,
+            "y": 100,
+            "z": 10,
+            "width": 2049,
+            "height": 1783.6,
+            "depth": 600,
+            "children": [],
+            "features": [
+              {
+                "id": "shelves-right",
+                "type": "shelf_set",
+                "x": 2099,
+                "y": 100,
+                "z": 10,
+                "width": 2049,
+                "height": 1783.6,
+                "depth": 600,
+                "params": {
+                  "count": 3,
+                  "spacing": "equal"
+                }
+              }
+            ],
+            "fronts": [
+              {
+                "id": "door-right",
+                "type": "door",
+                "x": 2099,
+                "y": 100,
+                "z": 10,
+                "width": 2049,
+                "height": 1783.6,
+                "depth": 600,
+                "params": {
+                  "hinge": "right",
+                  "materialId": "melamine-white"
+                }
+              }
+            ]
+          },
+          {
+            "id": "right-drawers",
+            "label": "Cajonera",
+            "x": 2099,
+            "y": 1883.6,
+            "z": 10,
+            "width": 2049,
+            "height": 764.4,
+            "depth": 600,
+            "children": [],
+            "features": [
+              {
+                "id": "drawers",
+                "type": "drawer_stack",
+                "x": 2099,
+                "y": 1883.6,
+                "z": 10,
+                "width": 2049,
+                "height": 764.4,
+                "depth": 600,
+                "params": {
+                  "count": 3,
+                  "runner": "soft-close"
+                }
+              }
+            ],
+            "fronts": [
+              {
+                "id": "drawer-fronts",
+                "type": "drawer_front",
+                "x": 2099,
+                "y": 1883.6,
+                "z": 10,
+                "width": 2049,
+                "height": 764.4,
+                "depth": 600,
+                "params": {
+                  "materialId": "melamine-white"
+                }
+              }
+            ]
+          }
+        ],
+        "features": [],
+        "fronts": []
+      }
+    ],
+    "features": [],
+    "fronts": [],
+    "materialId": "melamine-white-18"
+  }
+}
