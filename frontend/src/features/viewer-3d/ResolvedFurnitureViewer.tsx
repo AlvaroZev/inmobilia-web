@@ -56,7 +56,8 @@ export function ResolvedFurnitureViewer({ furniture }: ResolvedFurnitureViewerPr
     <Canvas
       shadows
       camera={{
-        position: [cameraDistance * 0.8, cameraDistance * 0.65, cameraDistance],
+        // Frente del mueble en −Z; cámara al frente para ver apertura de cajones hacia el usuario.
+        position: [cameraDistance * 0.8, cameraDistance * 0.65, -cameraDistance],
         fov: 45,
         near: 0.01,
         far: 100,

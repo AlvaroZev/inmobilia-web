@@ -48,11 +48,5 @@ func resolveEdgeBanding(materialID string) string {
 }
 
 func backMaterial(board domain.Material) domain.Material {
-	return domain.Material{
-		ID:        board.ID + "-back",
-		Name:      board.Name + " (trasera)",
-		Type:      "back_panel",
-		Thickness: defaultBackThickness,
-		Color:     board.Color,
-	}
+	return resolveBackPanelMaterial("melamine-white-18", board)
 }

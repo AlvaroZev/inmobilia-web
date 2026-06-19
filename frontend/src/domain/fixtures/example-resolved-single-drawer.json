@@ -1,0 +1,40 @@
+{
+  "id": "single-drawer-001",
+  "name": "Cajonera 50×35×40",
+  "root": {
+    "id": "root",
+    "label": "Cuerpo",
+    "x": 50,
+    "y": 100,
+    "z": 10,
+    "width": 500,
+    "height": 350,
+    "depth": 400,
+    "children": [],
+    "features": [
+      {
+        "id": "drawer-stack",
+        "type": "drawer_stack",
+        "x": 50,
+        "y": 100,
+        "z": 10,
+        "width": 500,
+        "height": 350,
+        "depth": 400,
+        "params": {
+          "count": 1,
+          "runner": "soft-close",
+          "drawerRearClearanceMm": 10,
+          "lateralInsetMm": 13.5,
+          "frontToleranceInsetMm": 1,
+          "runnerOffsetFromBaseMm": 50,
+          "backMaterialId": "nordex",
+          "bottomMaterialId": "nordex",
+          "bottomThicknessMm": 3
+        }
+      }
+    ],
+    "fronts": [],
+    "materialId": "melamine-white-18"
+  }
+}

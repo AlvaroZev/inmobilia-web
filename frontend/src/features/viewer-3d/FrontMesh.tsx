@@ -55,8 +55,20 @@ export function FrontMesh({ front, volume }: FrontMeshProps) {
 
   return (
     <group>
-      <PanelMesh {...panel} />
-      {handle && <PanelMesh {...handle} material={HANDLE} />}
+      <PanelMesh
+        {...panel}
+        layer="fronts"
+        label={front.type === 'door' ? 'Puerta' : front.type === 'drawer_front' ? 'Frente cajón' : 'Frente'}
+        materialId={typeof front.params.materialId === 'string' ? front.params.materialId : volume.materialId}
+      />
+      {handle && (
+        <PanelMesh
+          {...handle}
+          material={HANDLE}
+          layer="handle"
+          label="Tirador"
+        />
+      )}
     </group>
   );
 }

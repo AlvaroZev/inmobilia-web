@@ -29,7 +29,7 @@ func compileDoor(c *compileContext, volume domain.ResolvedVolume, front domain.R
 		"vertical",
 	)
 
-	addPartEdgeBanding(c, part.ID, domain.EdgeTop, part.Width)
+	addPartThickTopEdgeBanding(c, part.ID, part.Width)
 	addPartEdgeBanding(c, part.ID, domain.EdgeBottom, part.Width)
 	addPartEdgeBanding(c, part.ID, domain.EdgeLeft, part.Height)
 	addPartEdgeBanding(c, part.ID, domain.EdgeRight, part.Height)

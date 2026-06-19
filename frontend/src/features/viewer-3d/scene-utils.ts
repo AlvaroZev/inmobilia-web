@@ -20,6 +20,22 @@ export function volumeSize(volume: ResolvedVolume): [number, number, number] {
   return [mm(volume.width), mm(volume.height), mm(volume.depth)];
 }
 
+/** Caja debug alineada con profundidad estructural (sin el vuelo de la trasera). */
+export function volumeStructureDebugBox(
+  volume: ResolvedVolume,
+  structureDepthMm: number,
+): { position: [number, number, number]; size: [number, number, number] } {
+  const depth = Math.max(0, structureDepthMm);
+  return {
+    position: [
+      mm(volume.x + volume.width / 2),
+      mm(volume.y + volume.height / 2),
+      mm(volume.z + depth / 2),
+    ],
+    size: [mm(volume.width), mm(volume.height), mm(depth)],
+  };
+}
+
 export function furnitureSceneCenter(furniture: ResolvedFurniture): [number, number, number] {
   const bounds = furnitureBounds(furniture);
   return [

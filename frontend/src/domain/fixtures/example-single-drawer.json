@@ -1,0 +1,74 @@
+{
+
+  "id": "single-drawer-001",
+
+  "name": "Cajonera 50×35×40",
+
+  "description": "Caso 01 — 500×350×400 mm, 1 cajón, fondos nordex 3 mm con ranura",
+
+  "root": {
+
+    "id": "root",
+
+    "label": "Cuerpo",
+
+    "constraints": {
+
+      "width": { "mode": "fixed", "value": 500 },
+
+      "height": { "mode": "fixed", "value": 350 },
+
+      "depth": { "mode": "fixed", "value": 400 }
+
+    },
+
+    "children": [],
+
+    "features": [
+
+      {
+
+        "id": "drawer-stack",
+
+        "type": "drawer_stack",
+
+        "params": {
+
+          "count": 1,
+
+          "runner": "soft-close",
+
+          "drawerRearClearanceMm": 10,
+
+          "lateralInsetMm": 13.5,
+
+          "frontToleranceInsetMm": 1,
+
+          "runnerOffsetFromBaseMm": 50,
+
+          "backMaterialId": "nordex",
+
+          "bottomMaterialId": "nordex",
+
+          "bottomThicknessMm": 3
+
+        }
+
+      }
+
+    ],
+
+    "fronts": [],
+
+    "manufacturing": {
+
+      "materialId": "melamine-white-18",
+
+      "backPanel": true
+
+    }
+
+  }
+
+}
+

@@ -1,5 +1,7 @@
 import type { PanelMaterialProps } from './materials';
-import { boxCenter, boxSize } from './scene-utils';
+import { describePanelMaterial } from './materials';
+import type { PanelLayer } from './panel-layers';
+import { InspectablePanelMesh } from './InspectablePanelMesh';
 
 interface PanelMeshProps {
   x: number;
@@ -9,8 +11,14 @@ interface PanelMeshProps {
   height: number;
   depth: number;
   material: PanelMaterialProps;
+  layer?: PanelLayer;
+  label?: string;
+  materialLabel?: string;
+  materialId?: string;
   castShadow?: boolean;
   receiveShadow?: boolean;
+  emissive?: string;
+  onClick?: (event: import('@react-three/fiber').ThreeEvent<MouseEvent>) => void;
 }
 
 export function PanelMesh({
@@ -21,25 +29,31 @@ export function PanelMesh({
   height,
   depth,
   material,
+  layer = 'carcass',
+  label = 'Panel',
+  materialLabel,
+  materialId,
   castShadow = true,
   receiveShadow = true,
+  emissive,
+  onClick,
 }: PanelMeshProps) {
-  if (width <= 0 || height <= 0 || depth <= 0) {
-    return null;
-  }
-
   return (
-    <mesh
-      position={boxCenter(x, y, z, width, height, depth)}
+    <InspectablePanelMesh
+      x={x}
+      y={y}
+      z={z}
+      width={width}
+      height={height}
+      depth={depth}
+      material={material}
+      layer={layer}
+      label={label}
+      materialLabel={materialLabel ?? describePanelMaterial(material, materialId)}
       castShadow={castShadow}
       receiveShadow={receiveShadow}
-    >
-      <boxGeometry args={boxSize(width, height, depth)} />
-      <meshStandardMaterial
-        color={material.color}
-        roughness={material.roughness ?? 0.7}
-        metalness={material.metalness ?? 0.05}
-      />
-    </mesh>
+      emissive={emissive}
+      onClick={onClick}
+    />
   );
 }

@@ -81,26 +81,39 @@ func compileDrawerStack(c *compileContext, volume domain.ResolvedVolume, feature
 		drawerHeight = volume.Height / float64(count)
 	}
 
-	sideHeight := drawerHeight - 4
-	if sideHeight < 40 {
-		sideHeight = drawerHeight
-	}
-	sideDepth := c.innerDepth(volume)
-	bottomWidth := c.innerWidth(volume) - 2*c.material.Thickness
-	if nestedInDesk {
-		bottomWidth = volume.Width - 2*c.material.Thickness
-	}
-	bottomMaterial := resolveMaterial(stringFromParams(feature.Params, "bottomMaterialId", "nordex"))
-	bottomMaterial.Thickness = floatFromParams(feature.Params, "bottomThicknessMm", 3)
-	if !nestedInDesk {
-		bottomMaterial = c.material
+	finalFrontHeight := drawerHeight
+	if !nestedInDesk && count == 1 {
+		finalFrontHeight = volume.Height
 	}
 
-	frontWidth := volume.Width
-	if nestedInDesk {
-		frontWidth = volume.Width - c.material.Thickness
+	subtractCarcass := !nestedInDesk && count == 1
+	if feature.Params != nil {
+		subtractCarcass = boolFromParams(feature.Params, "carcassFloorCeiling", subtractCarcass)
 	}
-	frontHeight := drawerHeight
+
+	sideHeight := drawerBodySideHeight(finalFrontHeight, c.material.Thickness, subtractCarcass)
+
+	boxDepth := drawerBoxDepth(volume.Depth, c.back)
+	sideDepth := boxDepth
+	runnerLength := snapRunnerLengthMm(sideDepth)
+
+	boxW := drawerBoxWidth(volume.Width, nestedInDesk, c.material.Thickness)
+	bottomWidth := c.drawerBottomWidth(boxW-2*c.material.Thickness, nestedInDesk)
+	if nestedInDesk {
+		bottomWidth = c.drawerBottomWidth(boxW-c.material.Thickness, nestedInDesk)
+	}
+	if bottomWidth < 0 {
+		bottomWidth = c.drawerBottomWidth(c.innerWidth(volume)-2*c.material.Thickness, nestedInDesk)
+	}
+	bottomMaterialID := resolveBackMaterialIDFromParams(feature.Params)
+	bottomMaterial := resolveMaterial(bottomMaterialID)
+	bottomMaterial.Thickness = floatFromParams(feature.Params, "bottomThicknessMm", NordexThicknessMm)
+
+	frontPanelWidth := drawerFrontPanelWidth(volume.Width)
+	frontPanelHeight := drawerFrontPanelHeight(finalFrontHeight)
+	if nestedInDesk {
+		frontPanelWidth = drawerFrontPanelWidth(volume.Width - c.material.Thickness)
+	}
 
 	for i := 0; i < count; i++ {
 		prefix := fmt.Sprintf("Cajón %s %d", volume.Label, i+1)
@@ -109,9 +122,9 @@ func compileDrawerStack(c *compileContext, volume domain.ResolvedVolume, feature
 			left = c.addPart(volume.ID, prefix+" lateral", string(domain.PartDrawerSide), sideDepth, sideHeight, c.material, "vertical")
 			right = c.addPart(volume.ID, prefix+" lateral", string(domain.PartDrawerSide), sideDepth, sideHeight, c.material, "vertical")
 		}
-		bottom := c.addPart(volume.ID, prefix+" fondo", string(domain.PartDrawerBottom), bottomWidth, sideDepth, bottomMaterial, "horizontal")
-		front := c.addPart(volume.ID, prefix+" frente", string(domain.PartDoor), frontWidth, frontHeight-2, c.material, "vertical")
-		addPartEdgeBanding(c, front.ID, domain.EdgeTop, front.Width)
+		bottom := c.addPart(volume.ID, prefix+" fondo", string(domain.PartDrawerBottom), bottomWidth, c.drawerBottomDepth(sideDepth), bottomMaterial, "horizontal")
+		front := c.addPart(volume.ID, prefix+" frente", string(domain.PartDoor), frontPanelWidth, frontPanelHeight, c.material, "vertical")
+		addPartThickTopEdgeBanding(c, front.ID, front.Width)
 		addPartEdgeBanding(c, front.ID, domain.EdgeBottom, front.Width)
 		addPartEdgeBanding(c, front.ID, domain.EdgeLeft, front.Height)
 		addPartEdgeBanding(c, front.ID, domain.EdgeRight, front.Height)
@@ -131,7 +144,7 @@ func compileDrawerStack(c *compileContext, volume domain.ResolvedVolume, feature
 			Type:     "drawer_runner",
 			Quantity: 1,
 			PartIDs:  partIDs,
-			Params:   json.RawMessage(`{"runner":"` + runner + `"}`),
+			Params:   json.RawMessage(fmt.Sprintf(`{"runner":"%s","lengthMm":%.0f}`, runner, runnerLength)),
 		})
 	}
 }

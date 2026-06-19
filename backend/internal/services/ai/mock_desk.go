@@ -11,7 +11,7 @@ import (
 
 const deskFrameParams = `{"braceHeightRatio":0.5,"topOverhangMm":25}`
 
-const drawerStackBaseParams = `"sharedLateral":"right","drawerHeightMm":175,"backClearanceMm":40,"bottomMaterialId":"nordex","bottomThicknessMm":3,"grooveWidthMm":18,"grooveDepthMm":7,"grooveRailThicknessMm":4,"runnerHeightMm":40,"runnerWidthMm":8,"runnerLengthStepMm":50,"runnerLengthMinMm":200,"boxInsetSideMm":2`
+const drawerStackBaseParams = `"sharedLateral":"right","drawerHeightMm":175,"backClearanceMm":40,"bottomMaterialId":"nordex","bottomThicknessMm":3,"deskGrooveChannelMm":18,"grooveDepthMm":7,"grooveRailThicknessMm":4,"runnerHeightMm":40,"runnerWidthMm":8,"runnerLengthStepMm":50,"runnerLengthMinMm":250,"runnerLengthMaxMm":650,"boxInsetSideMm":2`
 
 func deskDrawerStackParams(intent deskDrawerIntent) json.RawMessage {
 	hasBase := intent.mode == "tower"

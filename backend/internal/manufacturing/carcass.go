@@ -10,13 +10,13 @@ func compileOuterCarcass(c *compileContext, volume domain.ResolvedVolume) {
 	t := c.material.Thickness
 	innerW := c.innerWidth(volume)
 	innerH := c.innerHeight(volume)
-	depth := volume.Depth
+	structureDepth := carcassStructureDepth(volume.Depth, c.back)
 
-	left := c.addPart(volume.ID, "Lateral izquierdo", string(domain.PartLateral), depth, volume.Height, c.material, "vertical")
-	right := c.addPart(volume.ID, "Lateral derecho", string(domain.PartLateral), depth, volume.Height, c.material, "vertical")
-	base := c.addPart(volume.ID, "Base", string(domain.PartBase), innerW, depth, c.material, "horizontal")
-	top := c.addPart(volume.ID, "Techo", string(domain.PartTop), innerW, depth, c.material, "horizontal")
-	back := c.addPart(volume.ID, "Trasera", string(domain.PartBack), innerW, innerH, c.back, "")
+	left := c.addPart(volume.ID, "Lateral izquierdo", string(domain.PartLateral), structureDepth, volume.Height, c.material, "vertical")
+	right := c.addPart(volume.ID, "Lateral derecho", string(domain.PartLateral), structureDepth, volume.Height, c.material, "vertical")
+	base := c.addPart(volume.ID, "Base", string(domain.PartBase), innerW, structureDepth, c.material, "horizontal")
+	top := c.addPart(volume.ID, "Techo", string(domain.PartTop), innerW, structureDepth, c.material, "horizontal")
+	back := c.addPart(volume.ID, "Trasera", string(domain.PartBack), c.backPanelWidth(innerW), c.backPanelHeight(innerH), c.back, "")
 
 	addPartEdgeBanding(c, left.ID, domain.EdgeTop, left.Width)
 	addPartEdgeBanding(c, left.ID, domain.EdgeBottom, left.Width)

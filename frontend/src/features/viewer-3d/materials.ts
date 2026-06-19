@@ -2,6 +2,8 @@ export const PANEL_THICKNESS_MM = 18;
 export const BACK_THICKNESS_MM = 6;
 export const FRONT_THICKNESS_MM = 18;
 export const BACK_SETBACK_MM = 8;
+/** Canto grueso (tapacanto PVC 3 mm) — frentes y tapa superior de cajón. */
+export const THICK_EDGE_BANDING_MM = 3;
 
 export interface PanelMaterialProps {
   color: string;
@@ -48,6 +50,13 @@ export const NORDEX: PanelMaterialProps = {
   metalness: 0,
 };
 
+/** Ranura vista en 3D (hueco para fondo nordex). */
+export const GROOVE: PanelMaterialProps = {
+  color: '#5a4f42',
+  roughness: 0.95,
+  metalness: 0,
+};
+
 export function resolvePanelMaterial(materialId?: string): PanelMaterialProps {
   if (materialId === 'nordex') {
     return NORDEX;
@@ -64,8 +73,43 @@ export const METAL: PanelMaterialProps = {
   metalness: 0.85,
 };
 
+export function resolveMaterialLabel(materialId?: string): string {
+  if (!materialId) {
+    return 'Melamina';
+  }
+  const labels: Record<string, string> = {
+    'melamine-white-18': 'Melamina blanca 18 mm',
+    'melamine-white': 'Melamina blanca',
+    'pvc-white-1mm': 'PVC blanco 1 mm',
+    nordex: 'Nordex',
+  };
+  return labels[materialId] ?? materialId;
+}
+
 export const HANDLE: PanelMaterialProps = {
   color: '#4a5568',
   roughness: 0.4,
   metalness: 0.6,
 };
+
+export function describePanelMaterial(material: PanelMaterialProps, materialId?: string): string {
+  if (materialId) {
+    return resolveMaterialLabel(materialId);
+  }
+  if (material.color === HANDLE.color) {
+    return 'Metal (tirador)';
+  }
+  if (material.color === METAL.color || (material.metalness ?? 0) > 0.5) {
+    return 'Metal';
+  }
+  if (material.color === BACK_PANEL.color) {
+    return 'Trasera MDF';
+  }
+  if (material.color === NORDEX.color) {
+    return 'Nordex';
+  }
+  if (material.color === GROOVE.color) {
+    return 'Ranura (fondo nordex)';
+  }
+  return 'Melamina';
+}

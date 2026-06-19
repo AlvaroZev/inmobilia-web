@@ -1,15 +1,25 @@
 import type { ResolvedFeature, ResolvedFront, ResolvedVolume } from '@/domain/resolved-furniture';
 import {
-  BACK_PANEL,
-  BACK_SETBACK_MM,
-  BACK_THICKNESS_MM,
+  backPanelThicknessMm,
+  backPanelsUseGrooves,
+  carcassStructureDepthMm,
+  nordexBackPanelZMm,
+  nordexPanelSpanMm,
+  NORDEX_GROOVE_INSET_MM,
+  resolveVolumeBackMaterialId,
+} from './back-panel';
+import { DEFAULT_DRAWER_STACK_CONFIG } from './drawer-config';
+import {
   FRONT_THICKNESS_MM,
+  GROOVE,
   MELAMINE,
   METAL,
   PANEL_THICKNESS_MM,
+  THICK_EDGE_BANDING_MM,
   resolveMaterialColor,
+  resolvePanelMaterial,
+  type PanelMaterialProps,
 } from './materials';
-import type { PanelMaterialProps } from './materials';
 
 export interface PanelSpec {
   x: number;
@@ -19,6 +29,7 @@ export interface PanelSpec {
   height: number;
   depth: number;
   material: PanelMaterialProps;
+  label?: string;
 }
 
 function intParam(params: Record<string, unknown>, key: string, fallback: number) {
@@ -45,9 +56,9 @@ export function innerHeight(volume: ResolvedVolume) {
   return Math.max(0, volume.height - 2 * PANEL_THICKNESS_MM);
 }
 
-export function innerDepth(volume: ResolvedVolume) {
-  const depth = volume.depth - BACK_THICKNESS_MM - BACK_SETBACK_MM;
-  return depth > PANEL_THICKNESS_MM ? depth : Math.max(0, volume.depth - BACK_THICKNESS_MM);
+export function innerDepth(volume: ResolvedVolume, backMaterialId?: string) {
+  const backT = backPanelThicknessMm(backMaterialId ?? resolveVolumeBackMaterialId(volume));
+  return Math.max(0, volume.depth - backT);
 }
 
 export function hasDeskFrame(volume: ResolvedVolume): boolean {
@@ -152,52 +163,133 @@ export function deskFramePanels(feature: ResolvedFeature, volume: ResolvedVolume
   return [leftLateral, rightLateral, backBrace, desktop];
 }
 
-export function outerCarcassPanels(volume: ResolvedVolume): PanelSpec[] {
+export function outerCarcassPanels(volume: ResolvedVolume, backMaterialId?: string): PanelSpec[] {
   const t = PANEL_THICKNESS_MM;
+  const backId = backMaterialId ?? resolveVolumeBackMaterialId(volume);
+  const backT = backPanelThicknessMm(backId);
+  const useGrooves = backPanelsUseGrooves(backId);
+  const groove = DEFAULT_DRAWER_STACK_CONFIG;
+  const structureDepth = carcassStructureDepthMm(volume.depth, backId);
+  const innerW = Math.max(0, volume.width - 2 * t);
+  const innerH = Math.max(0, volume.height - 2 * t);
+  const grooveZ = volume.z + structureDepth - groove.grooveOffsetFromEdgeMm - groove.grooveWidthMm;
+  const backPanelZ = useGrooves
+    ? nordexBackPanelZMm(
+        volume.z,
+        structureDepth,
+        backT,
+        groove.grooveOffsetFromEdgeMm,
+        groove.grooveWidthMm,
+      )
+    : volume.z + structureDepth - backT;
   const material = {
     ...MELAMINE,
     color: resolveMaterialColor(volume.materialId),
   };
+  const backMaterial = resolvePanelMaterial(backId === 'nordex' ? 'nordex' : volume.materialId);
 
-  return [
-    { x: volume.x, y: volume.y, z: volume.z, width: t, height: volume.height, depth: volume.depth, material },
+  const panels: PanelSpec[] = [
+    {
+      x: volume.x,
+      y: volume.y,
+      z: volume.z,
+      width: t,
+      height: volume.height,
+      depth: structureDepth,
+      material,
+      label: 'Lateral izquierdo',
+    },
     {
       x: volume.x + volume.width - t,
       y: volume.y,
       z: volume.z,
       width: t,
       height: volume.height,
-      depth: volume.depth,
+      depth: structureDepth,
       material,
+      label: 'Lateral derecho',
     },
     {
       x: volume.x + t,
       y: volume.y,
       z: volume.z,
-      width: volume.width - 2 * t,
+      width: innerW,
       height: t,
-      depth: volume.depth,
+      depth: structureDepth,
       material,
+      label: 'Piso',
     },
     {
       x: volume.x + t,
       y: volume.y + volume.height - t,
       z: volume.z,
-      width: volume.width - 2 * t,
+      width: innerW,
       height: t,
-      depth: volume.depth,
+      depth: structureDepth,
       material,
+      label: 'Techo',
     },
     {
-      x: volume.x + t,
-      y: volume.y + t,
-      z: volume.z + BACK_SETBACK_MM,
-      width: volume.width - 2 * t,
-      height: volume.height - 2 * t,
-      depth: BACK_THICKNESS_MM,
-      material: BACK_PANEL,
+      x: volume.x + t - (useGrooves ? NORDEX_GROOVE_INSET_MM : 0),
+      y: volume.y + t - (useGrooves ? NORDEX_GROOVE_INSET_MM : 0),
+      z: backPanelZ,
+      width: useGrooves ? nordexPanelSpanMm(innerW, 2) : innerW,
+      height: useGrooves ? nordexPanelSpanMm(innerH, 2) : innerH,
+      depth: backT,
+      material: backMaterial,
+      label: backId === 'nordex' ? 'Trasera nordex' : 'Trasera melamina',
     },
   ];
+
+  if (useGrooves) {
+    const gw = groove.grooveWidthMm;
+    const gd = groove.grooveDepthMm;
+    // Ranura = todo el borde del tablero de esa pieza (no el volumen exterior).
+    panels.push(
+      {
+        x: volume.x + t - gd,
+        y: volume.y,
+        z: grooveZ,
+        width: gd,
+        height: volume.height,
+        depth: gw,
+        material: GROOVE,
+        label: 'Ranura trasera (izq)',
+      },
+      {
+        x: volume.x + volume.width - t,
+        y: volume.y,
+        z: grooveZ,
+        width: gd,
+        height: volume.height,
+        depth: gw,
+        material: GROOVE,
+        label: 'Ranura trasera (der)',
+      },
+      {
+        x: volume.x + t,
+        y: volume.y + t - gd,
+        z: grooveZ,
+        width: innerW,
+        height: gd,
+        depth: gw,
+        material: GROOVE,
+        label: 'Ranura trasera (piso)',
+      },
+      {
+        x: volume.x + t,
+        y: volume.y + volume.height - t,
+        z: grooveZ,
+        width: innerW,
+        height: gd,
+        depth: gw,
+        material: GROOVE,
+        label: 'Ranura trasera (techo)',
+      },
+    );
+  }
+
+  return panels;
 }
 
 export function dividerPanel(left: ResolvedVolume, right: ResolvedVolume, parent: ResolvedVolume): PanelSpec | null {
@@ -262,7 +354,7 @@ export function featurePanels(
   const t = PANEL_THICKNESS_MM;
   const iw = nestedInDesk ? Math.max(0, volume.width - 2 * t) : innerWidth(volume);
   const ih = nestedInDesk ? volume.height : innerHeight(volume);
-  const id = nestedInDesk ? Math.max(0, volume.depth - BACK_THICKNESS_MM - BACK_SETBACK_MM) : innerDepth(volume);
+  const id = innerDepth(volume);
   const innerX = nestedInDesk ? volume.x + t : volume.x + t;
   const innerY = nestedInDesk ? volume.y : volume.y + t;
   const innerZ = volume.z;
@@ -386,12 +478,19 @@ export function frontPanel(front: ResolvedFront, volume: ResolvedVolume): PanelS
     ),
   };
 
-  if (front.type === 'drawer_front') {
+  const z = front.z;
+
+  if (front.type === 'door' || front.type === 'drawer_front') {
+    const tol = 1;
+    const outerWidth = Math.max(0, front.width - 2 * tol);
+    const panelWidth = Math.max(0, outerWidth - 2 * THICK_EDGE_BANDING_MM);
+    const outerX = front.x + tol;
+    const panelX = outerX + THICK_EDGE_BANDING_MM;
     return {
-      x: front.x,
+      x: panelX,
       y: front.y,
-      z: front.z + front.depth - FRONT_THICKNESS_MM,
-      width: front.width,
+      z,
+      width: panelWidth,
       height: front.height,
       depth: FRONT_THICKNESS_MM,
       material,
@@ -401,7 +500,7 @@ export function frontPanel(front: ResolvedFront, volume: ResolvedVolume): PanelS
   return {
     x: front.x,
     y: front.y,
-    z: front.z + front.depth - FRONT_THICKNESS_MM,
+    z,
     width: front.width,
     height: front.height,
     depth: FRONT_THICKNESS_MM,

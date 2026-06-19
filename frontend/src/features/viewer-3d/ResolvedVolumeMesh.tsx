@@ -10,7 +10,12 @@ import {
   nestedDrawerTowerPanels,
   outerCarcassPanels,
 } from './geometry';
-import { volumeCenter, volumeColor, volumeSize } from './scene-utils';
+import {
+  carcassStructureDepthMm,
+  resolveVolumeBackMaterialId,
+} from './back-panel';
+import { GROOVE } from './materials';
+import { volumeColor, volumeStructureDebugBox } from './scene-utils';
 import { FeatureMesh } from './FeatureMesh';
 import { FrontMesh } from './FrontMesh';
 import { PanelMesh } from './PanelMesh';
@@ -30,8 +35,6 @@ export function ResolvedVolumeMesh({ volume, depth, parent }: ResolvedVolumeMesh
 
   const isRoot = depth === 0;
   const isLeaf = volume.children.length === 0;
-  const position = useMemo(() => volumeCenter(volume), [volume]);
-  const size = useMemo(() => volumeSize(volume), [volume]);
   const color = volumeColor(depth, volume.id);
   const isSelected = selectedVolumeId === volume.id;
 
@@ -39,18 +42,28 @@ export function ResolvedVolumeMesh({ volume, depth, parent }: ResolvedVolumeMesh
   const isStandaloneDrawerCabinet =
     isLeaf && volume.features.some((f) => f.type === 'drawer_stack') && !hasDeskFrame(volume) && !nestedDrawer;
 
+  const backMaterialId = useMemo(() => resolveVolumeBackMaterialId(volume), [volume]);
+
   const carcassPanels = useMemo(() => {
     if (isRoot && !hasDeskFrame(volume) && !volume.children.some((child) => hasDeskFrame(child))) {
-      return outerCarcassPanels(volume);
+      return outerCarcassPanels(volume, backMaterialId);
     }
     if (nestedDrawer) {
       return nestedDrawerTowerPanels(volume);
     }
     if (isStandaloneDrawerCabinet) {
-      return outerCarcassPanels(volume);
+      return outerCarcassPanels(volume, backMaterialId);
     }
     return [];
-  }, [isRoot, nestedDrawer, isStandaloneDrawerCabinet, volume]);
+  }, [isRoot, nestedDrawer, isStandaloneDrawerCabinet, volume, backMaterialId]);
+
+  const debugBox = useMemo(() => {
+    if (carcassPanels.length === 0) {
+      return volumeStructureDebugBox(volume, volume.depth);
+    }
+    const structureDepth = carcassStructureDepthMm(volume.depth, backMaterialId);
+    return volumeStructureDebugBox(volume, structureDepth);
+  }, [backMaterialId, carcassPanels.length, volume]);
 
   const structuralFeatures = useMemo(
     () => volume.features.filter((feature) => feature.type === 'desk_frame'),
@@ -65,14 +78,34 @@ export function ResolvedVolumeMesh({ volume, depth, parent }: ResolvedVolumeMesh
   return (
     <group onClick={handleClick}>
       {carcassPanels.map((panel, index) => (
-        <PanelMesh key={`carcass-${volume.id}-${index}`} {...panel} />
+        <PanelMesh
+          key={`carcass-${volume.id}-${index}`}
+          {...panel}
+          layer="carcass"
+          label={panel.label ?? `Carcasa ${index + 1}`}
+          materialId={
+            panel.material === GROOVE
+              ? undefined
+              : panel.label?.includes('nordex')
+                ? 'nordex'
+                : volume.materialId
+          }
+        />
       ))}
 
       {volume.children.map((child, index) => (
         <group key={child.id}>
           {index > 0 && (() => {
             const divider = dividerPanel(volume.children[index - 1], child, volume);
-            return divider ? <PanelMesh key={`divider-${child.id}`} {...divider} /> : null;
+            return divider ? (
+              <PanelMesh
+                key={`divider-${child.id}`}
+                {...divider}
+                layer="carcass"
+                label="División"
+                materialId={volume.materialId}
+              />
+            ) : null;
           })()}
           <ResolvedVolumeMesh volume={child} depth={depth + 1} parent={volume} />
         </group>
@@ -104,8 +137,8 @@ export function ResolvedVolumeMesh({ volume, depth, parent }: ResolvedVolumeMesh
         ))}
 
       {showVolumes && (
-        <mesh position={position}>
-          <boxGeometry args={size} />
+        <mesh position={debugBox.position}>
+          <boxGeometry args={debugBox.size} />
           <meshStandardMaterial
             color={color}
             transparent

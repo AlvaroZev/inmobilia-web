@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import type { ResolvedFurniture } from '@/domain/resolved-furniture';
+import type { PanelInspectInfo, PanelLayer } from '@/features/viewer-3d/panel-layers';
+import { DEFAULT_GHOST_LAYERS } from '@/features/viewer-3d/panel-layers';
 import { normalizeResolvedFurniture, parseResolvedFurnitureJson } from '@/utils/load-resolved';
 
 interface ViewerState {
@@ -12,6 +14,8 @@ interface ViewerState {
   showVolumes: boolean;
   showFeatures: boolean;
   showFronts: boolean;
+  ghostLayers: Record<PanelLayer, boolean>;
+  hoveredPanel: PanelInspectInfo | null;
   setResolvedFurniture: (furniture: ResolvedFurniture) => void;
   clearResolvedFurniture: () => void;
   setOverrideJsonText: (text: string) => void;
@@ -23,6 +27,8 @@ interface ViewerState {
   toggleVolumes: () => void;
   toggleFeatures: () => void;
   toggleFronts: () => void;
+  toggleGhostLayer: (layer: PanelLayer) => void;
+  setHoveredPanel: (panel: PanelInspectInfo | null) => void;
 }
 
 export const useViewerStore = create<ViewerState>((set, get) => ({
@@ -35,6 +41,8 @@ export const useViewerStore = create<ViewerState>((set, get) => ({
   showVolumes: false,
   showFeatures: true,
   showFronts: true,
+  ghostLayers: { ...DEFAULT_GHOST_LAYERS },
+  hoveredPanel: null,
   setResolvedFurniture: (furniture) =>
     set({
       resolvedFurniture: normalizeResolvedFurniture(furniture),
@@ -50,7 +58,7 @@ export const useViewerStore = create<ViewerState>((set, get) => ({
       return true;
     }
     const result = parseResolvedFurnitureJson(text);
-    if (!result.ok) {
+    if (result.ok === false) {
       set({ overrideError: result.error });
       return false;
     }
@@ -82,4 +90,9 @@ export const useViewerStore = create<ViewerState>((set, get) => ({
   toggleVolumes: () => set((state) => ({ showVolumes: !state.showVolumes })),
   toggleFeatures: () => set((state) => ({ showFeatures: !state.showFeatures })),
   toggleFronts: () => set((state) => ({ showFronts: !state.showFronts })),
+  toggleGhostLayer: (layer) =>
+    set((state) => ({
+      ghostLayers: { ...state.ghostLayers, [layer]: !state.ghostLayers[layer] },
+    })),
+  setHoveredPanel: (panel) => set({ hoveredPanel: panel }),
 }));
